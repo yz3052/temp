@@ -130,3 +130,15 @@ for i, r in o_data.iterrows():
     
 
 driver.quit()
+
+
+
+o_data['creator_avatar_url'] = o_data['creator'].apply(lambda x: x['avatarurl'])
+o_data['creator_company'] = o_data['creator'].apply(lambda x: x['company'] if 'company' in x.keys() else np.nan)
+o_data['creator_last_visit_time'] = o_data['creator'].apply(lambda x: x['lastvisittime'] if 'lastvisittime' in x.keys() else np.nan)
+o_data['creator_uid'] = o_data['creator'].apply(lambda x: x['uid'])
+o_data['creator_uname'] = o_data['creator'].apply(lambda x: x['uname'])
+o_data['creator_occupation'] = o_data['creator'].apply(lambda x: x['occupation'] if 'occupation' in x.keys() else np.nan)
+o_data['creator_sign'] = o_data['creator'].apply(lambda x: x['sign'] if 'sign' in x.keys() else np.nan)
+o_data['start_time'] = pd.to_datetime(o_data['stime'],unit='ms')
+o_data = o_data.drop(columns = ['creator'])
