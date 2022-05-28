@@ -1,0 +1,103 @@
+.quantQ.complex.real2Cx:{[real]
+// real -- real number
+:`re`im!(`float$real;$[0>type real;0f;count[real]#0f]);
+};
+
+
+.quantQ.complex.log:{[cx;k]
+// cx -- complex number
+// k -- branching cut
+polar:.quantQ.complex.polar cx;
+:`re`im!(log polar`radius;polar[`angle] + 2 * .quantQ.pi * k);
+};
+
+
+
+.quantQ.complex.exp:{[cx]
+// cx -- complex number
+:exp[cx`re]*.quantQ.complex.realExp cx`im;
+};
+
+
+.quantQ.complex.realExp:{[phi]
+// phi -- angular component
+:`re`im!(cos;sin)@\:phi;
+};
+
+
+.quantQ.complex.polar:{[cx]
+// cx -- complex number
+// radial part
+r: sqrt cx wsum cx;
+// angular part
+phi:$[0<cx`re;atan cx[`im]%cx[`re];
+0>cx`re;$[0<=cx`im;
+atan[cx[`im]%cx[`re]] + .quantQ.pi;
+atan[cx[`im]%cx[`re]] - .quantQ.pi];
+0=cx`re;$[0<cx`im; .5 * .quantQ.pi;
+0>cx`im; -.5 * .quantQ.pi;
+0n];
+0n];
+:`radius`angle!(r;phi);
+};
+
+
+.quantQ.complex.conjugate:{@[x;`im;neg]}
+
+
+.quantQ.complex.div:{[num;den]
+	/ num -- numerator
+	/ den -- denominator
+	:`re`im!(wsum[num;den]%yy;(1 1 wsum den*reverse value num)%yy:den wsum den);
+};
+
+
+
+.quantQ.complex.mult:{`re`im!(1 -1 wsum x*y;x wsum reverse value y)};
+
+
+.quantQ.complex.dft1k:{[cxs;n;tiln;k]
+	/ cxs -- series of complex numbers
+	/ n -- length of the series
+	/ tiln -- index of the series
+	/ k -- coefficient of the DFT coefficient
+	sum .quantQ.complex.mult'[cxs;flip .quantQ.complex.realExp neg (2 * .quantQ.pi * k * tiln)%n];
+};
+
+
+
+.quantQ.complex.dft:{[cxs]
+	/ cxs -- series of complex numbers to be transformed
+	.quantQ.complex.dft1k[cxs;N;til N] peach til N:count cxs;
+};
+
+
+.quantQ.complex.dftTs:{[dfts]
+	// dfts -- DFT series
+	:update i from dfts,'.quantQ.complex.polar each dfts;
+};
+
+
+.quantQ.complex.dftTs[.quantQ.complex.dft[cxSeries]];
+
+t: 0.0+(1.0%1000)*til 5001;
+pi: acos[-1];
+xt: cos[2*pi*2*t]+0.5*cos[2*pi*4*t];
+tabXt:([] t;xt);
+
+
+
+.quantQ.complex.dftTab:{[tab]
+	// tab -- sorted time-series table with 2 columns (t and xt)
+	t:tab`t;
+	xt:update im:0f from `re xcol delete t from tab;
+	// sampling frequency
+	samplingFrequency:(count[t]-1)%(last[t]-first[t]);
+	// dft
+	dftts: .quantQ.complex.dftTs .quantQ.complex.dft xt;
+	// discrete fourier transform decomposition of the time series
+	:(([] f:samplingFrequency*(til count t)%neg[1]+count[t]),'dftts);
+};
+
+
+.quantQ.complex.dftTab[tabXt]
