@@ -1,0 +1,151 @@
+
+import requests
+import itertools
+
+
+import pandas as pd
+
+
+import os
+
+import urllib
+import random
+
+import time
+
+
+
+
+
+#---- get proxy list 
+
+i_proxy_list = requests.get("https://proxy.webshare.io/api/proxy/list/?page=1", headers={"Authorization": "Token 9c19162dad721af1ab935c6c5c497d4ff88b0a6d"}).json()
+i_proxy_list = [{"http": "http://"+i['username']+'-'+i['country_code']+'-rotate:'+i['password']+'@'+i['proxy_address']+':'+str(i['ports']['http'])+"/",
+                 "https": "http://"+i['username']+'-'+i['country_code']+'-rotate:'+i['password']+'@'+i['proxy_address']+':'+str(i['ports']['http'])+"/"} 
+                for i in i_proxy_list['results']]
+i_proxy_iter = itertools.cycle(i_proxy_list)
+
+
+
+
+#---- get calendar
+
+i_cal = pd.read_parquet(r"D:\Sync\1. Trading\Market Data\calendar\cn_calendar_thru2022.parquet")
+i_cal = i_cal[i_cal['cdate']>='2017-01-01']
+i_cal = i_cal[i_cal['cdate']<='2022-09-19']
+i_cal = i_cal[i_cal['flg_is_tdate']=='1']
+
+
+#---- scrape
+
+
+for i,r in i_cal.sort_values('cdate',ascending=False).iterrows():
+    
+    dt = r['cdate'].strip()
+    
+    
+    if dt > '2019-11-26':
+        continue    
+    print(dt,end=',')
+
+    try:
+        rand = str(random.random())
+        obj_proxy = urllib.request.ProxyHandler(next(i_proxy_iter))
+        opener = urllib.request.build_opener(obj_proxy)
+        opener.addheaders = [('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9')]
+        opener.addheaders = [('Accept-Encoding', 'gzip, deflate')]
+        opener.addheaders = [('Accept-Language', 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7')]
+        opener.addheaders = [('Connection', 'keep-alive')]
+        opener.addheaders = [('Host', 'www.szse.cn')]
+        opener.addheaders = [('Referer', 'http://www.szse.cn/disclosure/margin/object/index.html')]
+        opener.addheaders = [('Upgrade-Insecure-Requests', '1')]
+        opener.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36')]
+        urllib.request.install_opener(opener)
+        
+        urllib.request.urlretrieve('http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1834_xxpl&txtDate='+dt+'&tab1PAGENO=1&random='+rand+'&TABKEY=tab1', 
+                                   os.path.join(r'D:\Sync\1. Trading\Market Data\rzrq\sz','rzrq_biaodi_'+dt+'.xls'))
+        
+    except: 
+        time.sleep(5)
+        rand = str(random.random())
+        obj_proxy = urllib.request.ProxyHandler(next(i_proxy_iter))
+        opener = urllib.request.build_opener(obj_proxy)
+        opener.addheaders = [('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9')]
+        opener.addheaders = [('Accept-Encoding', 'gzip, deflate')]
+        opener.addheaders = [('Accept-Language', 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7')]
+        opener.addheaders = [('Connection', 'keep-alive')]
+        opener.addheaders = [('Host', 'www.szse.cn')]
+        opener.addheaders = [('Referer', 'http://www.szse.cn/disclosure/margin/object/index.html')]
+        opener.addheaders = [('Upgrade-Insecure-Requests', '1')]
+        opener.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36')]
+        urllib.request.install_opener(opener)
+        
+        urllib.request.urlretrieve('http://www.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx&CATALOGID=1834_xxpl&txtDate='+dt+'&tab1PAGENO=1&random='+rand+'&TABKEY=tab1', 
+                                   os.path.join(r'D:\Sync\1. Trading\Market Data\rzrq\sz','rzrq_biaodi'+dt+'.xls'))
+        
+
+
+
+
+
+
+
+
+
+
+
+
+import requests
+import itertools
+
+import pandas as pd
+import os
+
+import urllib
+
+
+
+
+#---- get proxy list 
+
+i_proxy_list = requests.get("https://proxy.webshare.io/api/proxy/list/?page=1", headers={"Authorization": "Token 9c19162dad721af1ab935c6c5c497d4ff88b0a6d"}).json()
+i_proxy_list = [{"http": "http://"+i['username']+'-'+i['country_code']+'-rotate:'+i['password']+'@'+i['proxy_address']+':'+str(i['ports']['http'])+"/",
+                 "https": "http://"+i['username']+'-'+i['country_code']+'-rotate:'+i['password']+'@'+i['proxy_address']+':'+str(i['ports']['http'])+"/"} 
+                for i in i_proxy_list['results']]
+i_proxy_iter = itertools.cycle(i_proxy_list)
+
+
+
+
+#---- get calendar
+
+i_cal = pd.read_parquet(r"D:\Sync\1. Trading\Market Data\calendar\cn_calendar_thru2022.parquet")
+i_cal = i_cal[i_cal['cdate']>='2017-01-01']
+i_cal = i_cal[i_cal['cdate']<='2022-09-19']
+i_cal = i_cal[i_cal['flg_is_tdate']=='1']
+
+
+
+for i,r in i_cal.sort_values('cdate',ascending=False).iterrows():
+    
+    dt = r['cdate'].replace('-','').strip()
+    print(dt,end=',')
+
+    try:
+    
+        obj_proxy = urllib.request.ProxyHandler(next(i_proxy_iter))
+        opener = urllib.request.build_opener(obj_proxy)
+        urllib.request.install_opener(opener)
+        
+        urllib.request.urlretrieve("http://www.sse.com.cn/market/dealingdata/overview/margin/a/rzrqjygk"+dt+".xls", 
+                                   os.path.join(r'D:\Sync\1. Trading\Market Data\rzrq\sh','rzrqjygk'+dt+'.xls'))
+        
+    except: 
+
+        obj_proxy = urllib.request.ProxyHandler(next(i_proxy_iter))
+        opener = urllib.request.build_opener(obj_proxy)
+        urllib.request.install_opener(opener)
+        
+        urllib.request.urlretrieve("http://www.sse.com.cn/market/dealingdata/overview/margin/a/rzrqjygk"+dt+".xls", 
+                                   os.path.join(r'D:\Sync\1. Trading\Market Data\rzrq\sh','rzrqjygk'+dt+'.xls'))
+        
