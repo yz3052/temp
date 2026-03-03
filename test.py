@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -14,8 +13,10 @@ import sys
 sys.path.append('/users/is/tozhang/PycharmProjects/projects/yz')
 import yz.util as yz
 
-# this scrapes forward -2 ~ 182 day IN earning calendar
-# https://www.tradingview.com/markets/stocks-india/earnings/
+
+# this scrapes forward -2 ~ 182 day JP earning calendar
+# https://www.tradingview.com/markets/stocks-japan/earnings/
+
 
 # it is impossible to scrape historical earnings data from this website.
 
@@ -29,9 +30,9 @@ import yz.util as yz
 #!- constants
 ##################################################################################
 
-NOW = pd.to_datetime(datetime.now()).tz_localize('Europe/London').tz_convert('Asia/Kolkata').tz_localize(None)
+NOW = pd.to_datetime(datetime.now()).tz_localize('Europe/London').tz_convert('Asia/Tokyo').tz_localize(None)
 
-TODAY = pd.to_datetime(datetime.now()).tz_localize('Europe/London').tz_convert('Asia/Kolkata').tz_localize(None)
+TODAY = pd.to_datetime(datetime.now()).tz_localize('Europe/London').tz_convert('Asia/Tokyo').tz_localize(None)
 TODAY = pd.to_datetime(TODAY.date())
 
 TODAY_int = int(TODAY.timestamp())
@@ -43,18 +44,13 @@ TODAY_2d_int = int(TODAY_2d.timestamp())
 TODAY_p182d = TODAY + pd.to_timedelta('182 day')
 TODAY_p182d_int = int(TODAY_p182d.timestamp())
 
-
-TODAY_p365d = TODAY + pd.to_timedelta('365 day')
-TODAY_p365d_int = int(TODAY_p365d.timestamp())
-
-
 ##################################################################################
 #!- Main
 ##################################################################################
 
 
 
-url = 'https://scanner.tradingview.com/india/scan'
+url = 'https://scanner.tradingview.com/japan/scan'
 
 cols = ["logoid", "name","market_cap_basic","earnings_per_share_forecast_next_fq","earnings_per_share_fq",
         "eps_surprise_fq","eps_surprise_percent_fq","revenue_forecast_next_fq","revenue_fq",
@@ -91,8 +87,8 @@ header = {'Accept': 'text/plain, */*; q=0.01',
 
 payload = {"filter":[
            {"left":"earnings_release_next_date","operation":"in_range",
-            "right":[TODAY_2d_int,TODAY_p365d_int]}],
- "options":{"lang":"en"},"markets":["india"],"symbols":{"query":{"types":[]},"tickers":[]},
+            "right":[TODAY_2d_int,TODAY_p182d_int]}],
+ "options":{"lang":"en"},"markets":["japan"],"symbols":{"query":{"types":[]},"tickers":[]},
  "columns": cols,
  "sort":{"sortBy":"market_cap_basic","sortOrder":"desc"},"preset":None,"range":[0,50000]}
 
@@ -111,6 +107,6 @@ with proxy():
     i_data['earnings_release_date'] = pd.to_datetime(i_data['earnings_release_date'], unit='s')
     i_data['earnings_release_calendar_date'] = pd.to_datetime(i_data['earnings_release_calendar_date'], unit='s')
 
-    i_data['scraper_ts_in'] = NOW
-    i_data['scraper_date_in'] = TODAY
-    i_data.to_sql("util_calendar_earn_tv_in", con=yz.create_sql_engine(), if_exists='append', index=False)
+    i_data['scraper_ts_jp'] = NOW
+    i_data['scraper_date_jp'] = TODAY
+    i_data.to_sql("util_calendar_earn_tv_jp", con=yz.create_sql_engine(), if_exists='append', index=False)
